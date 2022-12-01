@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 
+import './pages/pages.dart';
+import './utils/utils.dart';
+
 class FirebaseBlocCrudApp extends StatelessWidget {
-  const FirebaseBlocCrudApp({super.key});
+  FirebaseBlocCrudApp({super.key});
+
+  final _routesHandler = RoutesHandler();
 
   @override
   Widget build(BuildContext context) {
@@ -9,11 +14,8 @@ class FirebaseBlocCrudApp extends StatelessWidget {
       title: 'Flutter Firebase Bloc CRUD App',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.light(),
-      home: const Scaffold(
-        body: Center(
-          child: Text('Flutter Firebase Bloc CRUD App'),
-        ),
-      ),
+      home: const HomePage(),
+      routes: _routesHandler.routes,
     );
   }
 }
