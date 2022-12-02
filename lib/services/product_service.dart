@@ -102,4 +102,23 @@ class ProductService {
       );
     }
   }
+
+  Future<void> deleteProduct(String productId, String imageUrl) async {
+    try {
+      await firestore.collection(kUsersCollectionName).doc(productId).delete();
+      await storage.refFromURL(imageUrl).delete();
+    } on FirebaseException catch (err) {
+      throw CustomError(
+        code: err.code,
+        message: err.message!,
+        plugin: err.plugin,
+      );
+    } catch (err) {
+      throw CustomError(
+        code: 'Exception',
+        message: err.toString(),
+        plugin: 'flutter_error/server_error',
+      );
+    }
+  }
 }

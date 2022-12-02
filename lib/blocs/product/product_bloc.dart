@@ -22,6 +22,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     on<UpdateProductsEvent>(_onUpdateProducts);
     on<CreateProductEvent>(_onCreateProduct);
     on<UpdateProductEvent>(_onUpdateProduct);
+    on<DeleteProductEvent>(_onDeleteProduct);
   }
 
   @override
@@ -82,6 +83,22 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       await productRepository.updateProduct(event.product, event.image);
 
       emit(state.copyWith(status: ProductStatus.success));
+    } on CustomError catch (err) {
+      emit(state.copyWith(
+        status: ProductStatus.error,
+        error: err,
+      ));
+
+      if (kDebugMode) print('state $state');
+    }
+  }
+
+  void _onDeleteProduct(
+    DeleteProductEvent event,
+    Emitter<ProductState> emit,
+  ) async {
+    try {
+      await productRepository.deleteProduct(event.productId, event.imageUrl);
     } on CustomError catch (err) {
       emit(state.copyWith(
         status: ProductStatus.error,

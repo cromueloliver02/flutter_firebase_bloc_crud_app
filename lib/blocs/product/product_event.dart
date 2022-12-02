@@ -66,3 +66,16 @@ class UpdateProductEvent extends ProductEvent {
   @override
   List<Object?> get props => [product, image];
 }
+
+class DeleteProductEvent extends ProductEvent {
+  final String productId;
+  final String imageUrl;
+
+  const DeleteProductEvent({
+    required this.productId,
+    required this.imageUrl,
+  });
+
+  @override
+  List<Object?> get props => [productId];
+}

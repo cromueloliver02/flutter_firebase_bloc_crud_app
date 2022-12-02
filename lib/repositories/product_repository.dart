@@ -49,4 +49,12 @@ class ProductRepository {
       rethrow;
     }
   }
+
+  Future<void> deleteProduct(String productId, String imageUrl) async {
+    try {
+      await productService.deleteProduct(productId, imageUrl);
+    } on CustomError {
+      rethrow;
+    }
+  }
 }

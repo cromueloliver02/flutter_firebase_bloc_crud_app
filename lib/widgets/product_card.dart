@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
+import '../blocs/blocs.dart';
 import '../models/models.dart';
 import '../pages/pages.dart';
 import '../utils/utils.dart';
@@ -111,7 +112,12 @@ class _ProductCardPopMenuButton extends StatelessWidget {
           goToProductFormPage(context, product);
         }
 
-        if (value == PopMenuItemType.delete) {}
+        if (value == PopMenuItemType.delete) {
+          context.read<ProductBloc>().add(DeleteProductEvent(
+                productId: product.id!,
+                imageUrl: product.imageUrl,
+              ));
+        }
       },
       itemBuilder: (ctx) => [
         PopupMenuItem<PopMenuItemType>(
