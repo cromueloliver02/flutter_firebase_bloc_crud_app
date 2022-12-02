@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../models/models.dart';
+import '../blocs/blocs.dart';
 import '../widgets/widgets.dart';
 import '../utils/utils.dart';
 
@@ -10,7 +10,7 @@ class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   ProductCard _buildProductCard(BuildContext ctx, int idx) {
-    final product = Product.products[idx];
+    final product = ctx.read<ProductBloc>().state.products[idx];
 
     return ProductCard(product: product);
   }
@@ -49,11 +49,39 @@ class HomePage extends StatelessWidget {
           ),
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                childCount: Product.products.length,
-                _buildProductCard,
-              ),
+            sliver: BlocBuilder<ProductBloc, ProductState>(
+              builder: (ctx, state) {
+                if (state.products.isEmpty) {
+                  return SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: 300,
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.info,
+                              size: 35,
+                            ),
+                            const SizedBox(height: 20),
+                            Text(
+                              'No products available',
+                              style: textTheme.headline5,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }
+
+                return SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    childCount: state.products.length,
+                    _buildProductCard,
+                  ),
+                );
+              },
             ),
           )
         ],
