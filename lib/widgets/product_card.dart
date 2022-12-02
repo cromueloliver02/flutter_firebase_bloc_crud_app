@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 import '../models/models.dart';
+import '../pages/pages.dart';
 import '../utils/utils.dart';
 
 class ProductCard extends StatelessWidget {
@@ -12,76 +13,83 @@ class ProductCard extends StatelessWidget {
 
   final Product product;
 
+  void _goToProductDetailPage(BuildContext ctx) {
+    Navigator.pushNamed(ctx, ProductDetailPage.id, arguments: product.id);
+  }
+
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    return Container(
-      height: 150,
-      margin: const EdgeInsets.only(bottom: 10),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black26,
-            offset: Offset(0, 1),
-            blurRadius: 0.6,
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          CachedNetworkImage(
-            imageUrl: product.imageUrl,
-            width: 175,
-            height: double.infinity,
-            fit: BoxFit.cover,
-          ),
-          Flexible(
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        product.name,
-                        overflow: TextOverflow.ellipsis,
-                        style: textTheme.subtitle1,
-                      ),
-                      _ProductCardPopMenuButton(product: product),
-                    ],
-                  ),
-                  const SizedBox(height: 15),
-                  Text(
-                    product.description,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 2,
-                    style: textTheme.bodyText1!.copyWith(color: Colors.grey),
-                  ),
-                  const Spacer(),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Php ${product.price.toStringAsFixed(2)}',
-                        overflow: TextOverflow.ellipsis,
-                        style: textTheme.subtitle1,
-                      ),
-                      Text(
-                        'x ${product.quantity}',
-                        overflow: TextOverflow.ellipsis,
-                        style: textTheme.subtitle2,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+    return InkWell(
+      onTap: () => _goToProductDetailPage(context),
+      child: Container(
+        height: 150,
+        margin: const EdgeInsets.only(bottom: 10),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              offset: Offset(0, 1),
+              blurRadius: 0.6,
             ),
-          )
-        ],
+          ],
+        ),
+        child: Row(
+          children: [
+            CachedNetworkImage(
+              imageUrl: product.imageUrl,
+              width: 175,
+              height: double.infinity,
+              fit: BoxFit.cover,
+            ),
+            Flexible(
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          product.name,
+                          overflow: TextOverflow.ellipsis,
+                          style: textTheme.subtitle1,
+                        ),
+                        _ProductCardPopMenuButton(product: product),
+                      ],
+                    ),
+                    const SizedBox(height: 15),
+                    Text(
+                      product.description,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                      style: textTheme.bodyText1!.copyWith(color: Colors.grey),
+                    ),
+                    const Spacer(),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Php ${product.price.toStringAsFixed(2)}',
+                          overflow: TextOverflow.ellipsis,
+                          style: textTheme.subtitle1,
+                        ),
+                        Text(
+                          'x ${product.quantity}',
+                          overflow: TextOverflow.ellipsis,
+                          style: textTheme.subtitle2,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

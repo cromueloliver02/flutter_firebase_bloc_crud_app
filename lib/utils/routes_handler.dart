@@ -16,6 +16,13 @@ class RoutesHandler {
           settings: settings,
           builder: (ctx) => CreateProductPage(product: product),
         );
+
+      case ProductDetailPage.id:
+        final String productId = settings.arguments as String;
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (ctx) => ProductDetailPage(productId: productId),
+        );
     }
 
     return null;
