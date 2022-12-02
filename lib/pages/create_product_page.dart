@@ -1,12 +1,15 @@
 // ignore_for_file: unused_field
 
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:validators/validators.dart';
 import 'package:keyboard_dismisser/keyboard_dismisser.dart';
 
+import '../blocs/blocs.dart';
 import '../models/models.dart';
 import '../widgets/widgets.dart';
 import './pages.dart';
+import '../utils/utils.dart';
 
 class CreateProductPage extends StatelessWidget {
   static const id = '${HomePage.id}/create-product';
@@ -20,18 +23,26 @@ class CreateProductPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return KeyboardDismisser(
-      gestures: const [GestureType.onTap],
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Create New Product'),
-        ),
-        body: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 10,
-            vertical: 20,
+    return BlocSelector<ProductBloc, ProductState, ProductStatus>(
+      selector: (state) => state.status,
+      builder: (ctx, status) => WillPopScope(
+        onWillPop: () async => status != ProductStatus.submitting,
+        child: KeyboardDismisser(
+          gestures: const [GestureType.onTap],
+          child: Scaffold(
+            appBar: AppBar(
+              title: const Text('Create New Product'),
+            ),
+            body: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 20,
+                ),
+                child: _ProductPageForm(product: product),
+              ),
+            ),
           ),
-          child: _ProductPageForm(product: product),
         ),
       ),
     );
@@ -55,7 +66,7 @@ class _ProductPageFormState extends State<_ProductPageForm> {
   String? _name, _description;
   int? _quantity;
   double? _price;
-  String? _pickedImage;
+  XFile? _pickedImage;
   bool _isRecommended = false, _isPopular = false;
 
   void _submit() {
@@ -85,6 +96,19 @@ class _ProductPageFormState extends State<_ProductPageForm> {
       // print('_price $_price');
       // print('_isRecommended $_isRecommended');
       // print('_isPopular $_isPopular');
+
+      final createProductEvent = CreateProductEvent(
+        name: _name!,
+        description: _description!,
+        image: _pickedImage!,
+        quantity: _quantity!,
+        price: _price!,
+        isPopular: _isPopular,
+        isRecommended: _isRecommended,
+        dateCreated: DateTime.now(),
+      );
+
+      context.read<ProductBloc>().add(createProductEvent);
     }
   }
 
@@ -128,82 +152,105 @@ class _ProductPageFormState extends State<_ProductPageForm> {
     return null;
   }
 
+  void _productListener(BuildContext ctx, ProductState state) {
+    if (state.status == ProductStatus.success) {
+      Navigator.pop(context);
+    }
+
+    if (state.status == ProductStatus.error) {
+      showErrorDialog(context, state.error);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Form(
       key: _formKey,
-      child: ListView(
-        shrinkWrap: true,
-        reverse: true,
-        children: [
-          CustomTextFormField(
-            labelText: 'Name',
-            hintText: 'Enter name',
-            initialValue: widget.product?.name,
-            prefixIcon: const Icon(Icons.edit),
-            validator: _nameValidator,
-            onSaved: (value) => _name = value,
-          ),
-          const SizedBox(height: 10),
-          CustomTextFormField(
-            labelText: 'Description',
-            hintText: 'Enter description',
-            maxLines: 6,
-            initialValue: widget.product?.description,
-            prefixIcon: const Icon(Icons.note),
-            validator: _descriptionValidator,
-            onSaved: (value) => _description = value,
-          ),
-          const SizedBox(height: 10),
-          ImageFormField(
-            value: widget.product?.imageUrl,
-            onPickImage: (value) => _pickedImage = value,
-          ),
-          const SizedBox(height: 10),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      child: BlocConsumer<ProductBloc, ProductState>(
+        listener: _productListener,
+        builder: (ctx, state) {
+          final status = state.status;
+
+          return Column(
             children: [
-              Expanded(
-                child: CustomTextFormField(
-                  labelText: 'Quantity',
-                  hintText: 'Enter quantity',
-                  keyboardType: TextInputType.number,
-                  initialValue: widget.product?.quantity.toString(),
-                  prefixIcon: const Icon(Icons.numbers),
-                  validator: _quantityValidator,
-                  onSaved: (value) => _quantity = int.parse(value!),
-                ),
+              CustomTextFormField(
+                labelText: 'Name',
+                hintText: 'Enter name',
+                initialValue: widget.product?.name,
+                prefixIcon: const Icon(Icons.edit),
+                enabled: status != ProductStatus.submitting,
+                validator: _nameValidator,
+                onSaved: (value) => _name = value,
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: CustomTextFormField(
-                  labelText: 'Price',
-                  hintText: 'Enter price',
-                  initialValue: widget.product?.price.toStringAsFixed(2),
-                  prefixIcon: const Icon(Icons.price_check),
-                  validator: _priceValidator,
-                  onSaved: (value) => _price = double.parse(value!),
-                ),
+              const SizedBox(height: 10),
+              CustomTextFormField(
+                labelText: 'Description',
+                hintText: 'Enter description',
+                maxLines: 6,
+                initialValue: widget.product?.description,
+                prefixIcon: const Icon(Icons.note),
+                enabled: status != ProductStatus.submitting,
+                validator: _descriptionValidator,
+                onSaved: (value) => _description = value,
+              ),
+              const SizedBox(height: 10),
+              ImageFormField(
+                value: widget.product?.imageUrl,
+                enabled: status != ProductStatus.submitting,
+                onPickImage: (value) => _pickedImage = value,
+              ),
+              const SizedBox(height: 10),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: CustomTextFormField(
+                      labelText: 'Quantity',
+                      hintText: 'Enter quantity',
+                      keyboardType: TextInputType.number,
+                      initialValue: widget.product?.quantity.toString(),
+                      prefixIcon: const Icon(Icons.numbers),
+                      enabled: status != ProductStatus.submitting,
+                      validator: _quantityValidator,
+                      onSaved: (value) => _quantity = int.parse(value!),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: CustomTextFormField(
+                      labelText: 'Price',
+                      hintText: 'Enter price',
+                      initialValue: widget.product?.price.toStringAsFixed(2),
+                      prefixIcon: const Icon(Icons.price_check),
+                      enabled: status != ProductStatus.submitting,
+                      validator: _priceValidator,
+                      onSaved: (value) => _price = double.parse(value!),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              CheckboxField(
+                labelText: 'Recommended',
+                value: widget.product?.isRecommended ?? _isRecommended,
+                enabled: status != ProductStatus.submitting,
+                onChanged: (value) => setState(() => _isRecommended = value!),
+              ),
+              CheckboxField(
+                labelText: 'Popular',
+                value: widget.product?.isPopular ?? _isPopular,
+                enabled: status != ProductStatus.submitting,
+                onChanged: (value) => setState(() => _isPopular = value!),
+              ),
+              const SizedBox(height: 10),
+              CustomButton(
+                labelText:
+                    status == ProductStatus.submitting ? 'Saving...' : 'Save',
+                onPressed: status == ProductStatus.submitting ? null : _submit,
               ),
             ],
-          ),
-          const SizedBox(height: 10),
-          CheckboxField(
-            labelText: 'Recommended',
-            value: widget.product?.isRecommended ?? _isRecommended,
-            onChanged: (value) => setState(() => _isRecommended = value!),
-          ),
-          CheckboxField(
-            labelText: 'Popular',
-            value: widget.product?.isPopular ?? _isPopular,
-            onChanged: (value) => setState(() => _isPopular = value!),
-          ),
-          const SizedBox(height: 10),
-          CustomButton(
-            labelText: 'Save',
-            onPressed: _submit,
-          ),
-        ].reversed.toList(),
+          );
+        },
       ),
     );
   }

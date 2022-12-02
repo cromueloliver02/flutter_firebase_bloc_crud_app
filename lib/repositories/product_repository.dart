@@ -1,22 +1,44 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:image_picker/image_picker.dart';
 
+import '../services/services.dart';
 import '../models/models.dart';
-import '../utils/constants.dart';
 
 class ProductRepository {
-  final FirebaseFirestore firestore;
+  final ProductService productService;
 
   ProductRepository({
-    required this.firestore,
+    required this.productService,
   });
 
-  Stream<List<Product>> get products =>
-      firestore.collection(kUsersCollectionName).snapshots().map((snapshot) =>
-          snapshot.docs.map((doc) => Product.fromMap(doc.data())).toList());
+  Stream<List<Product>> get products {
+    return productService.productSnapshots.map((snapshot) {
+      return snapshot.docs.map((doc) => Product.fromDoc(doc)).toList();
+    });
+  }
 
-  // Stream<List<Product>> loadProducts() {
-  //   return firestore.collection(kUsersCollectionName).snapshots().map(
-  //       (snapshot) =>
-  //           snapshot.docs.map((doc) => Product.fromMap(doc.data())).toList());
-  // }
+  Future<void> createProduct({
+    required String name,
+    required String description,
+    required XFile image,
+    required int quantity,
+    required double price,
+    required bool isPopular,
+    required bool isRecommended,
+    required DateTime dateCreated,
+  }) async {
+    try {
+      await productService.createProduct(
+        name: name,
+        description: description,
+        image: image,
+        quantity: quantity,
+        price: price,
+        isPopular: isPopular,
+        isRecommended: isRecommended,
+        dateCreated: dateCreated,
+      );
+    } on CustomError {
+      rethrow;
+    }
+  }
 }

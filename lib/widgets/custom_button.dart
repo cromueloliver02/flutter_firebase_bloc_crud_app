@@ -8,7 +8,7 @@ class CustomButton extends StatelessWidget {
   });
 
   final String labelText;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {

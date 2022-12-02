@@ -19,3 +19,37 @@ class UpdateProductsEvent extends ProductEvent {
   @override
   List<Object> get props => [products];
 }
+
+class CreateProductEvent extends ProductEvent {
+  final String name;
+  final String description;
+  final XFile image;
+  final int quantity;
+  final double price;
+  final bool isPopular;
+  final bool isRecommended;
+  final DateTime dateCreated;
+
+  const CreateProductEvent({
+    required this.name,
+    required this.description,
+    required this.image,
+    required this.quantity,
+    required this.price,
+    required this.isPopular,
+    required this.isRecommended,
+    required this.dateCreated,
+  });
+
+  @override
+  List<Object> get props => [
+        name,
+        description,
+        image,
+        quantity,
+        price,
+        isPopular,
+        isRecommended,
+        dateCreated,
+      ];
+}

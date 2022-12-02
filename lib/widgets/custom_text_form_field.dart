@@ -10,6 +10,7 @@ class CustomTextFormField extends StatelessWidget {
     this.initialValue = '',
     this.keyboardType,
     this.validator,
+    this.enabled = true,
     this.onSaved,
   });
 
@@ -18,6 +19,7 @@ class CustomTextFormField extends StatelessWidget {
   final Icon prefixIcon;
   final int maxLines;
   final String? initialValue;
+  final bool enabled;
   final TextInputType? keyboardType;
   final String? Function(String?)? validator;
   final void Function(String?)? onSaved;
@@ -28,6 +30,7 @@ class CustomTextFormField extends StatelessWidget {
       initialValue: initialValue,
       maxLines: maxLines,
       keyboardType: keyboardType,
+      enabled: enabled,
       decoration: InputDecoration(
         labelText: labelText,
         hintText: hintText,

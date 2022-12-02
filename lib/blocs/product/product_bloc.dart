@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../models/models.dart';
 import '../../repositories/repositories.dart';
@@ -18,6 +20,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   }) : super(ProductState.initial()) {
     on<LoadProductsEvent>(_onLoadProducts);
     on<UpdateProductsEvent>(_onUpdateProducts);
+    on<CreateProductEvent>(_onCreateProduct);
   }
 
   @override
@@ -38,4 +41,40 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   ) {
     emit(state.copyWith(products: event.products));
   }
+
+  void _onCreateProduct(
+    CreateProductEvent event,
+    Emitter<ProductState> emit,
+  ) async {
+    emit(state.copyWith(status: ProductStatus.submitting));
+
+    try {
+      await productRepository.createProduct(
+        name: event.name,
+        description: event.description,
+        image: event.image,
+        quantity: event.quantity,
+        price: event.price,
+        isPopular: event.isPopular,
+        isRecommended: event.isRecommended,
+        dateCreated: event.dateCreated,
+      );
+
+      emit(state.copyWith(status: ProductStatus.success));
+    } on CustomError catch (err) {
+      emit(state.copyWith(
+        status: ProductStatus.error,
+        error: err,
+      ));
+
+      if (kDebugMode) print('state $state');
+    }
+  }
+}
+
+enum ProductStatus {
+  initial,
+  submitting,
+  success,
+  error,
 }

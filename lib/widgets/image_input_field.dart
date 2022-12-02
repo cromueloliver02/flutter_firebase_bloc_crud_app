@@ -6,11 +6,13 @@ class ImageFormField extends StatefulWidget {
   const ImageFormField({
     super.key,
     required this.value,
+    required this.enabled,
     required this.onPickImage,
   });
 
   final String? value;
-  final void Function(String) onPickImage;
+  final bool enabled;
+  final void Function(XFile) onPickImage;
 
   @override
   State<ImageFormField> createState() => _ImageFormFieldState();
@@ -35,7 +37,7 @@ class _ImageFormFieldState extends State<ImageFormField> {
 
     if (image != null) {
       setState(() => _pickedImage = image.path);
-      widget.onPickImage(image.path);
+      widget.onPickImage(image);
     }
   }
 
@@ -54,7 +56,10 @@ class _ImageFormFieldState extends State<ImageFormField> {
           child: Stack(
             alignment: Alignment.center,
             children: [
-              _PickImageButton(onSelectImage: () => _pickImage(context)),
+              _PickImageButton(
+                onSelectImage: () => _pickImage(context),
+                enabled: widget.enabled,
+              ),
               if (widget.value != null)
                 CachedNetworkImage(
                   imageUrl: widget.value!,
@@ -74,11 +79,13 @@ class _ImageFormFieldState extends State<ImageFormField> {
         ),
         if (_pickedImage != null || widget.value != null)
           TextButton(
-            onPressed: () => _pickImage(context),
+            onPressed: widget.enabled ? () => _pickImage(context) : null,
             child: Text(
               'Change Image',
               style: textTheme.subtitle1!.copyWith(
-                  color: Colors.blue, decoration: TextDecoration.underline),
+                color: widget.enabled ? Colors.blue : Colors.grey,
+                decoration: TextDecoration.underline,
+              ),
             ),
           ),
         if (_errorMessage != null)
@@ -96,9 +103,11 @@ class _ImageFormFieldState extends State<ImageFormField> {
 class _PickImageButton extends StatelessWidget {
   const _PickImageButton({
     Key? key,
+    required this.enabled,
     required this.onSelectImage,
   }) : super(key: key);
 
+  final bool enabled;
   final VoidCallback onSelectImage;
 
   @override
@@ -106,28 +115,33 @@ class _PickImageButton extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return InkWell(
-      onTap: onSelectImage,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(15),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.grey),
+      onTap: enabled ? onSelectImage : null,
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: enabled ? Colors.grey : Colors.grey.withAlpha(200),
+                ),
+              ),
+              child: Icon(
+                Icons.add_a_photo,
+                size: 35,
+                color: enabled ? Colors.grey : Colors.grey.withAlpha(200),
+              ),
             ),
-            child: const Icon(
-              Icons.add_a_photo,
-              size: 35,
-              color: Colors.grey,
+            const SizedBox(height: 15),
+            Text(
+              'Pick An Image',
+              style: textTheme.bodyText1!.copyWith(color: Colors.grey),
             ),
-          ),
-          const SizedBox(height: 15),
-          Text(
-            'Pick An Image',
-            style: textTheme.bodyText1!.copyWith(color: Colors.grey),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

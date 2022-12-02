@@ -1,9 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:equatable/equatable.dart';
 import 'package:uuid/uuid.dart';
 
 const Uuid uuid = Uuid();
 
-class Product {
-  final String id;
+class Product extends Equatable {
+  final String? id;
   final String name;
   final String description;
   final String imageUrl;
@@ -13,8 +15,8 @@ class Product {
   final bool isRecommended;
   final DateTime dateCreated;
 
-  Product({
-    required this.id,
+  const Product({
+    this.id,
     required this.name,
     required this.description,
     required this.imageUrl,
@@ -24,6 +26,26 @@ class Product {
     required this.isRecommended,
     required this.dateCreated,
   });
+
+  @override
+  List<Object?> get props {
+    return [
+      id,
+      name,
+      description,
+      imageUrl,
+      quantity,
+      price,
+      isPopular,
+      isRecommended,
+      dateCreated,
+    ];
+  }
+
+  @override
+  String toString() {
+    return 'Product(id: $id, name: $name, description: $description, imageUrl: $imageUrl, quantity: $quantity, price: $price, isPopular: $isPopular, isRecommended: $isRecommended, dateCreated: $dateCreated)';
+  }
 
   Product copyWith({
     String? id,
@@ -52,7 +74,9 @@ class Product {
   Map<String, dynamic> toMap() {
     final result = <String, dynamic>{};
 
-    result.addAll({'id': id});
+    if (id != null) {
+      result.addAll({'id': id});
+    }
     result.addAll({'name': name});
     result.addAll({'description': description});
     result.addAll({'imageUrl': imageUrl});
@@ -65,9 +89,11 @@ class Product {
     return result;
   }
 
-  factory Product.fromMap(Map<String, dynamic> map) {
+  factory Product.fromDoc(DocumentSnapshot doc) {
+    final map = doc.data() as Map<String, dynamic>;
+
     return Product(
-      id: map['id'] ?? '',
+      id: doc.id,
       name: map['name'] ?? '',
       description: map['description'] ?? '',
       imageUrl: map['imageUrl'] ?? '',
@@ -77,11 +103,6 @@ class Product {
       isRecommended: map['isRecommended'] ?? false,
       dateCreated: DateTime.fromMillisecondsSinceEpoch(map['dateCreated']),
     );
-  }
-
-  @override
-  String toString() {
-    return 'Product(id: $id, name: $name, description: $description, imageUrl: $imageUrl, quantity: $quantity, price: $price, isPopular: $isPopular, isRecommended: $isRecommended, dateCreated: $dateCreated)';
   }
 
   static final List<Product> products = [
