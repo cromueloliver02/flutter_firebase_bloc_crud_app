@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 import '../models/models.dart';
+import '../utils/utils.dart';
 
 class ProductCard extends StatelessWidget {
   const ProductCard({
@@ -50,7 +51,7 @@ class ProductCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: textTheme.subtitle1,
                       ),
-                      const _ProductCardPopMenuButton(),
+                      _ProductCardPopMenuButton(product: product),
                     ],
                   ),
                   const SizedBox(height: 15),
@@ -89,12 +90,21 @@ class ProductCard extends StatelessWidget {
 class _ProductCardPopMenuButton extends StatelessWidget {
   const _ProductCardPopMenuButton({
     Key? key,
+    required this.product,
   }) : super(key: key);
+
+  final Product product;
 
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<PopMenuItemType>(
-      onSelected: (value) {},
+      onSelected: (value) {
+        if (value == PopMenuItemType.edit) {
+          goToProductFormPage(context, product);
+        }
+
+        if (value == PopMenuItemType.delete) {}
+      },
       itemBuilder: (ctx) => [
         PopupMenuItem<PopMenuItemType>(
           value: PopMenuItemType.edit,

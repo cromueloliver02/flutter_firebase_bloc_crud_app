@@ -16,6 +16,7 @@ class FirebaseBlocCrudApp extends StatelessWidget {
       theme: ThemeData.light(),
       home: const HomePage(),
       routes: _routesHandler.routes,
+      onGenerateRoute: _routesHandler.onGenerateRoute,
     );
   }
 }
