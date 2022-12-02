@@ -21,6 +21,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     on<LoadProductsEvent>(_onLoadProducts);
     on<UpdateProductsEvent>(_onUpdateProducts);
     on<CreateProductEvent>(_onCreateProduct);
+    on<UpdateProductEvent>(_onUpdateProduct);
   }
 
   @override
@@ -59,6 +60,26 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         isRecommended: event.isRecommended,
         dateCreated: event.dateCreated,
       );
+
+      emit(state.copyWith(status: ProductStatus.success));
+    } on CustomError catch (err) {
+      emit(state.copyWith(
+        status: ProductStatus.error,
+        error: err,
+      ));
+
+      if (kDebugMode) print('state $state');
+    }
+  }
+
+  void _onUpdateProduct(
+    UpdateProductEvent event,
+    Emitter<ProductState> emit,
+  ) async {
+    emit(state.copyWith(status: ProductStatus.submitting));
+
+    try {
+      await productRepository.updateProduct(event.product, event.image);
 
       emit(state.copyWith(status: ProductStatus.success));
     } on CustomError catch (err) {

@@ -1,5 +1,3 @@
-// ignore_for_file: unused_field
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:validators/validators.dart';
@@ -11,10 +9,10 @@ import '../widgets/widgets.dart';
 import './pages.dart';
 import '../utils/utils.dart';
 
-class CreateProductPage extends StatelessWidget {
-  static const id = '${HomePage.id}/create-product';
+class ProductFormPage extends StatelessWidget {
+  static const id = '${HomePage.id}/product-form';
 
-  const CreateProductPage({
+  const ProductFormPage({
     Key? key,
     required this.product,
   }) : super(key: key);
@@ -39,7 +37,7 @@ class CreateProductPage extends StatelessWidget {
                   horizontal: 10,
                   vertical: 20,
                 ),
-                child: _ProductPageForm(product: product),
+                child: _ProductForm(product: product),
               ),
             ),
           ),
@@ -49,8 +47,8 @@ class CreateProductPage extends StatelessWidget {
   }
 }
 
-class _ProductPageForm extends StatefulWidget {
-  const _ProductPageForm({
+class _ProductForm extends StatefulWidget {
+  const _ProductForm({
     Key? key,
     required this.product,
   }) : super(key: key);
@@ -58,16 +56,23 @@ class _ProductPageForm extends StatefulWidget {
   final Product? product;
 
   @override
-  State<_ProductPageForm> createState() => _ProductPageFormState();
+  State<_ProductForm> createState() => _ProductPageFormState();
 }
 
-class _ProductPageFormState extends State<_ProductPageForm> {
+class _ProductPageFormState extends State<_ProductForm> {
   final _formKey = GlobalKey<FormState>();
   String? _name, _description;
   int? _quantity;
   double? _price;
   XFile? _pickedImage;
   bool _isRecommended = false, _isPopular = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _isRecommended = widget.product?.isRecommended ?? false;
+    _isPopular = widget.product?.isPopular ?? false;
+  }
 
   void _submit() {
     final form = _formKey.currentState;
@@ -85,30 +90,39 @@ class _ProductPageFormState extends State<_ProductPageForm> {
     if (form == null || form.validate()) {
       form!.save();
 
-      // print('_name $_name');
-      // print('_description $_description');
-      // if (_pickedImage == null) {
-      //   print('widget.product?.imageUrl ${widget.product?.imageUrl}');
-      // } else {
-      //   print('_pickedImage $_pickedImage');
-      // }
-      // print('_quantity $_quantity');
-      // print('_price $_price');
-      // print('_isRecommended $_isRecommended');
-      // print('_isPopular $_isPopular');
+      if (widget.product == null) {
+        final createProductEvent = CreateProductEvent(
+          name: _name!,
+          description: _description!,
+          image: _pickedImage!,
+          quantity: _quantity!,
+          price: _price!,
+          isPopular: _isPopular,
+          isRecommended: _isRecommended,
+          dateCreated: DateTime.now(),
+        );
 
-      final createProductEvent = CreateProductEvent(
-        name: _name!,
-        description: _description!,
-        image: _pickedImage!,
-        quantity: _quantity!,
-        price: _price!,
-        isPopular: _isPopular,
-        isRecommended: _isRecommended,
-        dateCreated: DateTime.now(),
-      );
+        context.read<ProductBloc>().add(createProductEvent);
+      }
 
-      context.read<ProductBloc>().add(createProductEvent);
+      if (widget.product != null) {
+        final newProduct = Product(
+          id: widget.product!.id,
+          name: _name!,
+          description: _description!,
+          imageUrl: widget.product!.imageUrl,
+          quantity: _quantity!,
+          price: _price!,
+          isPopular: _isPopular,
+          isRecommended: _isRecommended,
+          dateCreated: widget.product!.dateCreated,
+        );
+
+        context.read<ProductBloc>().add(UpdateProductEvent(
+              product: newProduct,
+              image: _pickedImage,
+            ));
+      }
     }
   }
 
@@ -232,13 +246,13 @@ class _ProductPageFormState extends State<_ProductPageForm> {
               const SizedBox(height: 10),
               CheckboxField(
                 labelText: 'Recommended',
-                value: widget.product?.isRecommended ?? _isRecommended,
+                value: _isRecommended,
                 enabled: status != ProductStatus.submitting,
                 onChanged: (value) => setState(() => _isRecommended = value!),
               ),
               CheckboxField(
                 labelText: 'Popular',
-                value: widget.product?.isPopular ?? _isPopular,
+                value: _isPopular,
                 enabled: status != ProductStatus.submitting,
                 onChanged: (value) => setState(() => _isPopular = value!),
               ),

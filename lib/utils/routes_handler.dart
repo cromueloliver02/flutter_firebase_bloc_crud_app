@@ -10,11 +10,11 @@ class RoutesHandler {
 
   Route<dynamic>? onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
-      case CreateProductPage.id:
+      case ProductFormPage.id:
         final Product? product = settings.arguments as Product?;
         return MaterialPageRoute(
           settings: settings,
-          builder: (ctx) => CreateProductPage(product: product),
+          builder: (ctx) => ProductFormPage(product: product),
         );
 
       case ProductDetailPage.id:

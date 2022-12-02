@@ -41,4 +41,12 @@ class ProductRepository {
       rethrow;
     }
   }
+
+  Future<void> updateProduct(Product product, XFile? image) async {
+    try {
+      await productService.updateProduct(product, image);
+    } on CustomError {
+      rethrow;
+    }
+  }
 }

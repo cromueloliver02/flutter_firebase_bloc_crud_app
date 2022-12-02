@@ -63,4 +63,43 @@ class ProductService {
       );
     }
   }
+
+  Future<void> updateProduct(Product product, XFile? image) async {
+    try {
+      String? imageUrl;
+
+      if (image != null) {
+        await storage
+            .ref('$kProductImagePath/${image.name}')
+            .putFile(File(image.path));
+
+        imageUrl = await storage
+            .ref('$kProductImagePath/${image.name}')
+            .getDownloadURL();
+
+        await storage.refFromURL(product.imageUrl).delete();
+      }
+
+      final newProduct = product.copyWith(
+        imageUrl: imageUrl ?? product.imageUrl,
+      );
+
+      await firestore
+          .collection(kUsersCollectionName)
+          .doc(product.id)
+          .update(newProduct.toMap());
+    } on FirebaseException catch (err) {
+      throw CustomError(
+        code: err.code,
+        message: err.message!,
+        plugin: err.plugin,
+      );
+    } catch (err) {
+      throw CustomError(
+        code: 'Exception',
+        message: err.toString(),
+        plugin: 'flutter_error/server_error',
+      );
+    }
+  }
 }

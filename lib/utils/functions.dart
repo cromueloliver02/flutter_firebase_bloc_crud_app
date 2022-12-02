@@ -7,7 +7,7 @@ import '../models/models.dart';
 import '../pages/pages.dart';
 
 void goToProductFormPage(BuildContext ctx, Product? product) {
-  Navigator.pushNamed(ctx, CreateProductPage.id, arguments: product);
+  Navigator.pushNamed(ctx, ProductFormPage.id, arguments: product);
 }
 
 void showErrorDialog(BuildContext ctx, CustomError error) {
