@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
+import '../blocs/blocs.dart';
 import '../models/models.dart';
 import 'pages.dart';
 
@@ -28,9 +29,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   }
 
   void _fetchProduct(String id) async {
-    await Future.delayed(const Duration(seconds: 2));
+    final products = context.read<ProductBloc>().state.products;
+
     setState(() {
-      product = Product.products.firstWhere((d) => d.id == widget.productId);
+      product = products.firstWhere((d) => d.id == widget.productId);
     });
   }
 
